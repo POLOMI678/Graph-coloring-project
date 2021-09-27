@@ -1,0 +1,249 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int** EdgeInput(int v)
+{
+    int p, q=0;
+    int **edge = (int **)malloc(v *sizeof(int *));
+
+    printf("\nEnter 1 if edge exists between the present Vertex and the corresponding vertex.\n\n");
+    printf("Enter 0 if edge does not exists and also if it is same as the present vertex.\n\n");
+
+    for(p=0; p<v; p++)
+    {
+        edge[p] = (int *)malloc(v *sizeof(int));
+        printf("For Vertex %d, \n",p+1);
+
+        for(q=0; q<v; q++)
+        {
+            printf("Enter 1 or 0 for Vertex %d :: ",q+1);
+            scanf("%d",&edge[p][q]);
+        }
+        printf("\n");
+    }
+    return edge;
+}
+
+int main()
+{
+    int p,q,v,c,count=0,maxE=0,vMaxE = 1;
+
+    printf("Enter number of vertices: ");
+    scanf("%d",&v);
+    printf("Number of vertices = %d\n",v);
+
+    int *numEdge = (int *)malloc(v *sizeof(int));
+    int *colorGraph = (int *)malloc(v *sizeof(int));
+
+    int **edgesInput = EdgeInput(v);
+
+    //Displaying the Adjacency matrix
+    for(p=0; p<v; p++)
+    {
+        for(q=0; q<v; q++)
+        {
+            printf("%d ",edgesInput[p][q]);
+        }
+        printf("\n");
+    }
+    
+    printf("Enter number of colours :: ");
+    scanf("%d",&c);
+
+    //Graph Colouring...
+    //Counting number of edges connected to each vertex
+    for(p=0; p<v; p++)
+    {
+        count = 0;
+        for(q=0; q<v; q++)
+        {
+            if(edgesInput[p][q] == 1)
+                count += 1;
+        }
+        numEdge[p] = count;
+    }
+    //Displaying the number of edges
+    for(p=0; p<v; p++)
+    {
+        printf ("%d ",numEdge[p]);
+    }
+    printf("\n");
+    //Determining vertex with maximum number of edges
+    for(p=0; p<v; p++)
+    {
+        if (numEdge[p] > maxE)
+        {
+            maxE = numEdge[p];
+            vMaxE = p+1;
+        }
+    }
+    printf("Vertex with maximum edges is Vertex %d\n",vMaxE);
+    //Colouring
+    //Declaring Colour matrix
+    int **color = (int **)malloc(v *sizeof(int *));
+
+    //Checking if colour could be same or not
+    for(p=0; p<v; p++)
+    {
+        color[p] = (int *)malloc(v *sizeof(int));
+        for(q=0; q<v; q++)
+        {
+            if (edgesInput[p][q]==1)
+                color[p][q] = 2;
+            else
+                color[p][q] = 1;
+        }
+    }
+
+    for(p=0; p<v; p++)
+    {
+        for(q=0; q<v; q++)
+            printf("%d",color[p][q]);
+        printf("\n");
+    }
+    //Assigning vertex with max edges as Color 1
+
+    //initialize all values to 0
+    for(p=0; p<v; p++)
+        colorGraph[p] = 0;
+
+    //Initializing colour
+    int assignedcolor = 1;
+    colorGraph[vMaxE-1] = 1;
+
+
+    //Assigning Color to vertices by checking that adjacent vertices color is same or not
+    for(p=0; p<v; p++)
+    {
+        printf("%d\n",p);
+        for(q=0; q<v; q++)
+        {
+            if(p != q && color[p][q]==1)
+            {
+                    //Checking if adjacent vertex has same color
+                    for(int k = 0; k<v; k++)
+                    {
+                        if (q != k && edgesInput[q][k] == 1)
+                        {
+                            if (colorGraph[k]!=colorGraph[p] )
+                            {
+                                if (colorGraph[q] !=0 )
+                                {
+                                    if(p!=0 && p<v-1 && colorGraph[p-1] != colorGraph[q] && colorGraph[p+1]!=colorGraph[q])
+                                        colorGraph[p]=colorGraph[q];
+                                    else if(p==0 && colorGraph[p+1]!=colorGraph[q])
+                                        colorGraph[p]=colorGraph[q];
+                                    else if(p==v-1 && colorGraph[p-1]!=colorGraph[q])
+                                        colorGraph[p]=colorGraph[q];
+                                }
+                                else if(colorGraph[q]==0)
+                                    colorGraph[q]=colorGraph[p];
+                            }
+                        }
+                    }
+                    if(colorGraph[q]==0)
+                        colorGraph[q]=colorGraph[p];
+                }
+                else if(color[p][q]==2)
+                {
+                    if (colorGraph[q] == 0)
+                    {
+                        assignedcolor +=1;
+                        colorGraph[q] = assignedcolor;
+                    }
+                    else if (colorGraph[q] != 0)
+                    {
+                        if (colorGraph[q] == colorGraph[p])
+                        {
+                            //checking the highest value of color
+                            int highestcolor = 1;
+                            for(int c=0; c<v; c++)
+                            {
+                                if(colorGraph[c] > highestcolor)
+                                    highestcolor = colorGraph[c];
+                            }
+
+                            colorGraph[q] = highestcolor+1;
+                        }
+                    }
+            }
+            for(int w=0; w<v; w++)
+            {
+                printf("%d ",colorGraph[w]);
+            }
+            printf("\n");
+        }
+    }
+
+    //Colored Graph
+    int numCol = 0;
+    for(p = 0; p < v; p++)
+    {
+        for (q=0; q<p; q++)
+        {
+            if (colorGraph[p] == colorGraph[q])
+                break;
+        }
+        if (p == q)
+            numCol+=1;
+    }
+
+    //Displaying number of colors required
+    printf("Number of Colors Required :: %d\n",numCol);
+
+    //Displaying the colored graph
+    printf("Colored Graph :: \n");
+    for(p=0; p<v; p++)
+    {
+        printf("%d ",colorGraph[p]);
+    }
+    printf("\n");
+}
+
+Output: 
+Enter number of vertices: 3
+Number of vertices = 3
+
+Enter 1 if edge exists between the present Vertex and the corresponding vertex.
+
+Enter 0 if edge does not exists and also if it is same as the present vertex.
+
+For Vertex 1, 
+Enter 1 or 0 for Vertex 1 :: 0
+Enter 1 or 0 for Vertex 2 :: 1
+Enter 1 or 0 for Vertex 3 :: 0
+
+For Vertex 2, 
+Enter 1 or 0 for Vertex 1 :: 1
+Enter 1 or 0 for Vertex 2 :: 1
+Enter 1 or 0 for Vertex 3 :: 1
+
+For Vertex 3, 
+Enter 1 or 0 for Vertex 1 :: 1
+Enter 1 or 0 for Vertex 2 :: 1
+Enter 1 or 0 for Vertex 3 :: 0
+
+0 1 0 
+1 1 1 
+1 1 0 
+Enter number of colours :: 3
+1 3 2 
+Vertex with maximum edges is Vertex 2
+121
+222
+221
+0
+0 1 0 
+0 1 0 
+0 1 0 
+1
+2 1 0 
+2 3 0 
+2 3 3 
+2
+2 3 3 
+2 4 3 
+2 4 3 
+Number of Colors Required :: 3
+Colored Graph :: 
+2 4 3
